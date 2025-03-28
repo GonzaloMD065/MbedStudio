@@ -1,0 +1,28 @@
+#include "mbed.h"
+
+mbed::I2C temp_sensor(I2C_SDA, I2C_SCL);
+mbed::Serial pc(USBTX, USBRX);
+const int temp_addr = 0x90;
+
+int main() {
+    pc.baud(9600);
+    printf("Sistema iniciado\n");
+    
+    while(1) {
+        char cmd_start = 0x51;
+        temp_sensor.write(temp_addr, &cmd_start, 1);
+        
+        ThisThread::sleep_for(500ms);
+        
+        char cmd_read = 0xAA;
+        char temp_data[2];
+        
+        temp_sensor.write(temp_addr, &cmd_read, 1);
+        temp_sensor.read(temp_addr, temp_data, 2);
+        
+        float temp = (float((temp_data[0] << 8) | temp_data[1]) / 256);
+        printf("Temp: %.2fC\n", temp);
+        
+        ThisThread::sleep_for(1s);
+    }
+}
