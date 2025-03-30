@@ -93,7 +93,7 @@ int main(){
     thread2.start(callback(count_thread, &ser_port));
     thread3.start(callback(temp_thread, &temp_sensor));
     while(true) { 
-        __wfi(); //Wait for interrupt
+        __WFI(); //Wait for interrupt
     }
 }
 
