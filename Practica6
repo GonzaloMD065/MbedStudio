@@ -62,7 +62,7 @@ int main(){
     thread1.start(callback(led1_thread, &led));
     thread2.start(callback(count_thread, &ser_port));
     while(true) { 
-        __wfi(); //Wait for interrupt
+        __WFI(); //Wait for interrupt
     }
 }
 
