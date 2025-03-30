@@ -1,0 +1,50 @@
+#include "mbed.h"
+#include "TextLCD.h"
+
+// Configuración de la pantalla LCD (puertos a modificar según conexión)
+I2C i2c_lcd(PB_9, PB_8);  // Pines SDA, SCL para LCD I2C
+TextLCD_I2C lcd(&i2c_lcd, 0x27, TextLCD::LCD16x2); // Dirección I2C de la LCD
+
+// Configuración del sensor de temperatura (ejemplo: MAX6675 con SPI)
+SPI spi(PB_5, PB_4, PB_3); // MOSI, MISO, SCK (MAX6675 usa solo MISO y SCK)
+DigitalOut cs(PC_7);       // Chip Select para el sensor de temperatura
+
+// Comunicación serial con la PC
+BufferedSerial pc(USBTX, USBRX, 9600);
+
+float read_temperature() {
+    cs = 0; // Seleccionar el termopar
+    wait_us(10);
+    
+    int value = spi.write(0x00) << 8; // Leer MSB
+    value |= spi.write(0x00); // Leer LSB
+    
+    cs = 1; // Desactivar el termopar
+    
+    if (value & 0x4) {
+        return -1.0; // Error en el sensor
+    }
+    
+    return (value >> 3) * 0.25; // Convertir a grados Celsius
+}
+
+int main() {
+    pc.write("Iniciando...\n", 13);
+    lcd.cls();
+    lcd.printf("Temp Sensor");
+
+    while (true) {
+        float temp = read_temperature();
+        
+        // Enviar datos a la terminal
+        char buffer[32];
+        int len = sprintf(buffer, "Temperatura: %.2f C\n", temp);
+        pc.write(buffer, len);
+        
+        // Mostrar en LCD
+        lcd.locate(0, 1);
+        lcd.printf("Temp: %.2f C ", temp);
+        
+        thread_sleep_for(1000);
+    }
+}
