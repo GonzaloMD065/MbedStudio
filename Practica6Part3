@@ -107,7 +107,7 @@ int main(){
     thread3.start(callback(temp_thread, &temp_sensor));
     thread4.start(callback(pwm_thread, &pot1));
     while(true) { 
-        __wfi(); //Wait for interrupt
+        __WFI(); //Wait for interrupt
     }
 }
 
